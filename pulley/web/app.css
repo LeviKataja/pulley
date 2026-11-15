@@ -1,17 +1,27 @@
 /* The whole window is the board: a bar on top, the projects on the left, the selected project's details on
    the right, a thin bar at the bottom. Cells sit 2px apart on a darker ground, like the panels of a
    departures board. A narrow window stacks the same parts, board first.
+
+   One rule decides how everything looks. What can be pressed is a key: an outline with a hard edge
+   under it. A row you can select ends in an arrow. What only tells you something (state blocks,
+   chips, counts) is flat paint with no outline. Bright green is kept for the one main thing to do.
+
    Nothing is loaded from elsewhere, so the type is whatever condensed face the machine has. */
 :root {
   color-scheme: light dark;
   --gap: #b9c0c8;
   --row: #ffffff;
   --panel: #f3f4f6;
-  --sel: #e9efff;
+  --sel: #dcf3e8;
   --ink: #14181c;
   --dim: #56606b;
+  --key: #ffffff;
+  --lip: #8a939e;
+  --go: #34d399;
+  --on-go: #06281c;
+  --go-lip: #1f8f66;
   --new: #1f4fd8;
-  --ok: #1b7a4b;
+  --ok: #17633f;
   --warn: #e0a100;
   --stop: #b3361e;
   --idle: #6b7480;
@@ -31,11 +41,12 @@
     --gap: #050607;
     --row: #1a1e23;
     --panel: #14171b;
-    --sel: #1f2a44;
+    --sel: #15302a;
     --ink: #eef1f4;
     --dim: #a0a9b3;
+    --key: #262b32;
+    --lip: #7d8792;
     --new: #3d6df2;
-    --ok: #1e8553;
     --warn: #f0b429;
     --stop: #c9472d;
     --idle: #59626d;
@@ -56,22 +67,27 @@ h2, h3, p, ul, ol, dl, dd, pre { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 [hidden] { display: none !important; }
 button { color: inherit; font: inherit; cursor: pointer; }
-button:focus-visible, a:focus-visible, pre:focus-visible, summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+button:focus-visible, a:focus-visible, pre:focus-visible, summary:focus-visible { outline: 2px solid var(--go); outline-offset: 2px; }
 
 /* shared pieces */
 .label { color: var(--dim); font: 600 13px/1.2 var(--disp); font-stretch: condensed; letter-spacing: .1em; text-transform: uppercase; }
 .mono { font: 13px/1.4 var(--mono); }
 .keep { text-transform: none; }
 .grow { flex: 1; }
+/* what can be pressed: a key, which sinks as it is pressed */
 .btn {
-  padding: 7px 18px; border: 2px solid var(--ink); background: none;
+  position: relative; top: 0; margin-bottom: 3px; padding: 7px 18px; border: 2px solid var(--ink);
+  background: var(--key); box-shadow: 0 3px 0 var(--lip); white-space: nowrap;
   font: 600 16px/1.2 var(--disp); font-stretch: condensed; letter-spacing: .07em; text-transform: uppercase;
 }
-.btn:hover:not(:disabled) { background: var(--ink); color: var(--row); }
-.btn.go { border-color: var(--new); background: var(--new); color: var(--on); }
-.btn.go:hover:not(:disabled) { border-color: var(--ink); background: var(--ink); color: var(--row); }
-.btn.small { padding: 2px 9px; border-width: 1px; font-size: 13px; }
+.btn:hover:not(:disabled) { top: 1px; box-shadow: 0 2px 0 var(--lip); }
+.btn:active:not(:disabled) { top: 3px; box-shadow: none; }
+.btn.go { border-color: var(--go); background: var(--go); box-shadow: 0 3px 0 var(--go-lip); color: var(--on-go); }
+.btn.go:hover:not(:disabled) { box-shadow: 0 2px 0 var(--go-lip); }
+.btn.small { margin-bottom: 2px; padding: 2px 9px; box-shadow: 0 2px 0 var(--lip); font-size: 13px; }
+.btn.small:hover:not(:disabled) { box-shadow: 0 1px 0 var(--lip); }
 .btn:disabled { opacity: .4; cursor: default; }
+/* what only tells you something: flat paint */
 .new { background: var(--new); color: var(--on); }
 .ok { background: var(--ok); color: var(--on); }
 .warn { background: var(--warn); color: var(--on-warn); }
@@ -100,7 +116,7 @@ button:focus-visible, a:focus-visible, pre:focus-visible, summary:focus-visible 
 .board { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .rows { display: grid; gap: 2px; }
 .rows:empty { display: none; }
-.cols, .row { display: grid; grid-template-columns: 112px minmax(0, 1.3fr) minmax(0, .95fr) minmax(0, .95fr) minmax(0, 1.05fr) minmax(0, 1.2fr); }
+.cols, .row { display: grid; grid-template-columns: 112px minmax(0, 1.3fr) minmax(0, .95fr) minmax(0, .95fr) minmax(0, 1.05fr) minmax(0, 1.2fr) 36px; }
 .cols { background: var(--row); }
 .cols span { padding: 7px 12px; }
 .row { width: 100%; padding: 0; border: 0; background: var(--row); text-align: left; }
@@ -111,6 +127,8 @@ button:focus-visible, a:focus-visible, pre:focus-visible, summary:focus-visible 
 .row .st i { font-style: normal; font-size: 14px; font-weight: 600; letter-spacing: .08em; }
 .row .nm { font: 700 26px/1.05 var(--disp); font-stretch: condensed; letter-spacing: .02em; text-transform: uppercase; }
 .row .sub { color: var(--dim); font-size: 13.5px; }
+.row .open { justify-items: center; padding: 0; color: var(--lip); font: 700 28px/1 var(--disp); }
+.row:hover .open, .row[aria-pressed="true"] .open { color: var(--ink); }
 .row[aria-pressed="true"] { background: var(--sel); box-shadow: inset 0 0 0 2px var(--ink); }
 .rest { flex: 1; min-height: 24px; background: var(--row); }
 .empty { padding: 40px 16px; background: var(--row); color: var(--dim); text-align: center; overflow-wrap: anywhere; }
@@ -159,12 +177,13 @@ button:focus-visible, a:focus-visible, pre:focus-visible, summary:focus-visible 
   .cols, .rest { display: none; }
   .right { margin-left: 0; justify-content: flex-start; }
   .facts { justify-content: flex-start; }
-  .row { grid-template-columns: 92px minmax(0, 1fr); }
+  .row { grid-template-columns: 92px minmax(0, 1fr) 36px; }
   .row .st { grid-row: 1 / span 5; }
   .row .st b { font-size: 34px; }
-  .row > span:not(.st) { display: block; grid-column: 2; padding: 1px 12px; font-size: 13.5px; }
-  .row > span.nm { padding-top: 9px; font-size: 24px; }
-  .row > span:last-child { padding-bottom: 9px; }
+  .row > span:not(.st):not(.open) { display: block; grid-column: 2; padding: 1px 12px; font-size: 13.5px; }
+  .row > span.nm.nm { padding-top: 9px; font-size: 24px; }
+  .row > span:nth-last-child(2):not(.st) { padding-bottom: 9px; }
+  .row > .open { grid-column: 3; grid-row: 1 / span 5; }
   .row > span[data-l]::before { content: attr(data-l) " "; color: var(--dim); font: 600 12px var(--disp); font-stretch: condensed; letter-spacing: .1em; text-transform: uppercase; }
   .hist li { grid-template-columns: minmax(8ch, max-content) minmax(0, 1fr) auto auto; }
   .hist .took { display: none; }

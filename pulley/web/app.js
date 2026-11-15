@@ -142,7 +142,8 @@ function row(p) {
   cell('Available', p.target ? called(p.target) : p.state === 'unknown' ? '–' : 'nothing newer', p.follows, !!p.target),
   cell('Container', c ? [c.status || 'unknown', c.health].filter(Boolean).join(' · ') : '–', up),
   cell('Last update', last ? (last.kind === 'back' && last.result === 'done' ? 'Went back' : LAST[last.result] || last.result)
-    : 'Never here', last ? stamp(last.at) : ''));
+    : 'Never here', last ? stamp(last.at) : ''),
+  h('span', {class: 'open', 'aria-hidden': 'true', text: '\u203a'}));
 }
 
 function pick(name) {
