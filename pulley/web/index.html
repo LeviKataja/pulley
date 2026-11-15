@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pulley</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><img src="/icon.svg" alt="" width="22" height="22"><span>Pulley</span></a>
+  <span class="tag" id="demo" hidden>Demo: nothing here is real</span>
+  <span class="grow"></span>
+  <span class="checked" id="checked"></span>
+  <button class="btn" id="checkBtn" type="button">Check now</button>
+</header>
+
+<main>
+  <div id="banners" aria-live="polite"></div>
+  <div id="list" class="list"></div>
+  <p class="empty" id="empty" hidden></p>
+</main>
+
+<footer class="foot" id="foot"></footer>
+
+<dialog id="askDlg" class="dlg">
+  <form method="dialog">
+    <h2 id="askTitle"></h2>
+    <p id="askText"></p>
+    <div class="dlg-actions">
+      <button class="btn" value="no" type="submit">Cancel</button>
+      <button class="btn primary" id="askYes" value="yes" type="submit"></button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="logDlg" class="dlg wide">
+  <form method="dialog">
+    <h2 id="logTitle">Output</h2>
+    <pre id="logText" class="out tall" tabindex="0"></pre>
+    <div class="dlg-actions"><button class="btn" type="submit">Close</button></div>
+  </form>
+</dialog>
+
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+__pycache__/
+*.egg-info/
+build/
+.claude/
+# Made when Pulley is run from its own folder, as the README describes.
+/data/
+/compose.yaml

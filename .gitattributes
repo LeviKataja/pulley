@@ -1,0 +1,3 @@
+# Unix line endings everywhere: these files are built and run on Linux, wherever they were cloned.
+* text=auto eol=lf
+*.png binary

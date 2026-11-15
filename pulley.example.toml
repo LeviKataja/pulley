@@ -1,0 +1,25 @@
+# Pulley's settings. Pulley reads this file again every time it looks for updates.
+
+# How often to look on its own: "30m", "6h", "1d", or "never" (then only when Check now is pressed).
+check_every = "6h"
+
+# One block per app.
+[[project]]
+name = "myapp"                        # what the page calls it: lowercase letters, digits, - _ .
+path = "/srv/apps/myapp"              # the git checkout the app is built from
+service = "myapp"                     # its service in the compose file (default: the name)
+
+# Everything below is optional.
+
+# compose = "deploy/compose.yaml"     # the compose file, when it is not compose.yaml or docker-compose.yml in path
+# project_name = "myapp"              # when the app was started with docker compose -p
+
+# follow = "branch"                   # "branch": every new commit. "tags": only new version tags.
+# branch = "main"                     # which branch (default: the one that is checked out)
+# tags = "v*"                         # with follow = "tags": which tag names count as versions
+# prereleases = false                 # with follow = "tags": also offer -rc, -beta and the like
+
+# health_url = "http://192.168.1.10:8080/"   # an address that answers once the app is up
+# health_wait = "2m"                  # how long the new version gets to come up
+# settle = "20s"                      # with no health check and no health_url: how long it must stay running
+# build_wait = "30m"                  # how long a build may take

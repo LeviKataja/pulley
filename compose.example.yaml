@@ -1,0 +1,14 @@
+# Running Pulley itself. Copy to compose.yaml, change the three marked lines, then:
+#   docker compose up -d --build
+services:
+  pulley:
+    build: .
+    ports: ["8790:8790"]
+    environment:
+      PULLEY_PASSWORD: "choose-a-password"          # 1. the page asks for this
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock   # lets Pulley drive the machine's Docker
+      - ./data:/data                                # 2. settings (pulley.toml), history and logs
+      - /srv/apps:/srv/apps                         # 3. the folder holding the checkouts: the SAME path on both sides
+    restart: unless-stopped
+    stop_grace_period: 3m                           # when stopped during an update, Pulley finishes it first

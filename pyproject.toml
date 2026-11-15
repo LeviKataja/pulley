@@ -1,0 +1,22 @@
+[project]
+name = "pulley-updater"
+version = "0.1.0"
+description = "Updates for apps that run in Docker and are built from a git checkout: asks first, checks health, puts the old version back"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+pulley = "pulley.cli:main"
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["pulley"]
+
+[tool.setuptools.package-data]
+pulley = ["web/*"]
