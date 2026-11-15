@@ -12,7 +12,10 @@ RUN apt-get update \
         > /etc/apt/sources.list.d/docker.sources \
     && apt-get update \
     && apt-get install -y --no-install-recommends docker-ce-cli docker-buildx-plugin docker-compose-plugin \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    # The checkouts belong to other users than the one Pulley runs as. Pulley tells git so on every call,
+    # but a repository on the same machine is read by a second git that only listens to this file.
+    && git config --system --add safe.directory '*'
 
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE ./

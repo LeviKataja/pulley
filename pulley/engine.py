@@ -402,16 +402,35 @@ class Manager:
             st["state"] = "waiting" if st["behind"] else "ok"
         return st
 
+    def _latest(self, name: str) -> str:
+        """The id of the newest attempt on record for a project, whichever Pulley made it."""
+        history = self.store.history(name)
+        return history[0].get("id", "") if history else ""
+
     def _remember(self, p: Project, st: dict) -> None:
+        st["_latest"] = self._latest(p.name)
         with self._lock:
             self.status[p.name] = st
 
-    def check(self, fetch: bool = True) -> None:
-        """Look at every project. One look at a time; a second call while one runs does nothing."""
+    def _claim(self) -> bool:
+        """Mark a look as under way. False when one already is."""
         with self._lock:
             if self.checking:
-                return
+                return False
             self.checking = True
+            return True
+
+    def check(self, fetch: bool = True) -> None:
+        """Look at every project. One look at a time; a second call while one runs does nothing."""
+        if self._claim():
+            self._check(fetch)
+
+    def check_soon(self, fetch: bool = True) -> None:
+        """The same in the background. The page sees "checking" from the moment this returns."""
+        if self._claim():
+            threading.Thread(target=self._check, args=(fetch,), daemon=True).start()
+
+    def _check(self, fetch: bool) -> None:
         try:
             self._load()
             env = self._environment()
@@ -420,12 +439,10 @@ class Manager:
                     continue
                 self._remember(p, self._survey(p, fetch, env))
             self.docker_error = env["docker_error"]
-            self.checked = time.time()
+            if fetch:
+                self.checked = time.time()
         finally:
             self.checking = False
-
-    def check_soon(self) -> None:
-        threading.Thread(target=self.check, daemon=True).start()
 
     def watch(self) -> None:
         """Look now, then again every so often, until stop() is called."""
@@ -458,16 +475,21 @@ class Manager:
         with self._lock:
             job = self.job
             projects = []
+            stale = False
             for p in self.cfg.projects:
                 st = self.status.get(p.name) or {"state": "unknown", "current": None, "target": None, "behind": 0,
                                                  "changes": [], "problems": [], "notes": [], "container": None,
                                                  "follows": "", "at": 0}
+                # Another Pulley (the command line) may have updated this project since it was looked at.
+                stale = stale or ("_latest" in st and st["_latest"] != self._latest(p.name))
                 item = {k: v for k, v in st.items() if not k.startswith("_")}
                 item.update(name=p.name, path=str(p.path), service=p.service,
                             job=job.json() if job and job.name == p.name else None,
                             previous=(self.store.previous(p.name) or {}).get("commit"),
                             history=self.store.history(p.name)[:12])
                 projects.append(item)
+            if stale and not job and not _elsewhere(self.store.pending()):
+                self.check_soon(fetch=False)
             return {"version": __version__, "demo": False, "checked": self.checked, "checking": self.checking,
                     "busy": job.name if job else None, "config_file": str(self.config_file),
                     "config_error": self.config_error, "docker_error": self.docker_error,

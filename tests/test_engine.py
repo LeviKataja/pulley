@@ -131,6 +131,20 @@ class Looking(WorldCase):
         p = self.look()
         self.assertEqual(p["state"], "ok")
         self.assertIn("could not be reached", p["notes"][0])
+        self.assertIn("does not appear to be a git repository", p["notes"][0], "git's own reason is passed on")
+
+    def test_check_now_shows_at_once(self):
+        self.push(app="version 2")
+        before = self.mgr.state()["checked"]
+        self.mgr.check_soon()
+        self.assertTrue(self.mgr.state()["checking"], "the page must see it from the first moment")
+        self.mgr.check_soon()  # a second press changes nothing
+        deadline = time.monotonic() + 30
+        while self.mgr.checking and time.monotonic() < deadline:
+            time.sleep(0.05)
+        state = self.mgr.state()
+        self.assertGreater(state["checked"], before)
+        self.assertEqual(state["projects"][0]["state"], "waiting")
 
     def test_settings_are_read_again(self):
         self.settings('follow = "tags"')
@@ -515,6 +529,20 @@ class TwoPulleys(WorldCase):
         self.assertEqual(p["history"][0]["result"], "done")
         self.assertIsNotNone(p["previous"])
         self.assertIsNotNone(Manager(self.home).store.previous("shop"), "and it is still on disk")
+
+    def test_the_page_notices_what_the_command_line_did(self):
+        new = self.push(app="version 2")
+        self.assertEqual(self.look()["state"], "waiting")
+        other = Manager(self.home)
+        other.poll, other.own = 0.02, lambda: None
+        self.assertEqual(other.run_now("update", "shop")["result"], "done")
+        self.assertEqual(self.project()["history"][0]["result"], "done", "asking is what makes it look again")
+        deadline = time.monotonic() + 30
+        while self.mgr.checking and time.monotonic() < deadline:
+            time.sleep(0.05)
+        p = self.project()
+        self.assertEqual((p["state"], p["current"]["sha"]), ("ok", new))
+        self.assertFalse(self.mgr.checking, "and it does not keep looking")
 
     def test_one_at_a_time_between_them(self):
         self.push(app="version 2")

@@ -18,6 +18,15 @@ class GitError(Exception):
     pass
 
 
+def _why(e: run.CommandError) -> str:
+    """git's reason in one line. Its first "fatal:" line says what went wrong; its last line rarely does."""
+    for line in e.output.splitlines():
+        kind, _, rest = line.strip().partition(":")
+        if kind.lower() in ("fatal", "error") and rest.strip():
+            return rest.strip()[:300]
+    return str(e)
+
+
 @dataclass
 class Commit:
     sha: str
@@ -48,13 +57,13 @@ class Repo:
         try:
             return run.out(self._cmd(*args), timeout=timeout)
         except run.CommandError as e:
-            raise GitError(str(e)) from e
+            raise GitError(_why(e)) from e
 
     def _stream(self, *args: str, timeout: float = 120, on_line=None) -> None:
         try:
             run.stream(self._cmd(*args), timeout=timeout, on_line=on_line)
         except run.CommandError as e:
-            raise GitError(str(e)) from e
+            raise GitError(_why(e)) from e
 
     def _yes(self, *args: str) -> bool:
         """For git commands that answer with their exit code: 0 yes, 1 no."""
@@ -64,7 +73,7 @@ class Repo:
         except run.CommandError as e:
             if e.code == 1:
                 return False
-            raise GitError(str(e)) from e
+            raise GitError(_why(e)) from e
 
     def _rev(self, ref: str) -> str:
         try:
