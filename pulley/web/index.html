@@ -9,20 +9,30 @@
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="/"><img src="/icon.svg" alt="" width="22" height="22"><span>Pulley</span></a>
+  <a class="logo" href="/">Pulley</a>
   <span class="tag" id="demo" hidden>Demo: nothing here is real</span>
-  <span class="grow"></span>
-  <span class="checked" id="checked"></span>
-  <button class="btn" id="checkBtn" type="button">Check now</button>
+  <ul class="tally label" id="tally" aria-label="Projects by state"></ul>
+  <div class="right">
+    <span class="facts label" id="facts"></span>
+    <button class="btn" id="checkBtn" type="button">Check now</button>
+  </div>
 </header>
 
-<main>
-  <div id="banners" aria-live="polite"></div>
-  <div id="list" class="list"></div>
-  <p class="empty" id="empty" hidden></p>
+<div class="banners" id="banners" aria-live="polite"></div>
+
+<main class="main">
+  <section class="board" aria-label="Projects">
+    <div class="cols label" aria-hidden="true">
+      <span>State</span><span>Project</span><span>Running</span><span>Available</span><span>Container</span><span>Last update</span>
+    </div>
+    <div class="rows" id="rows"></div>
+    <p class="empty" id="empty" hidden></p>
+    <div class="rest"></div>
+  </section>
+  <section class="detail" id="detail" aria-label="The selected project"></section>
 </main>
 
-<footer class="foot" id="foot"></footer>
+<footer class="foot label" id="foot"></footer>
 
 <dialog id="askDlg" class="dlg">
   <form method="dialog">
@@ -30,7 +40,7 @@
     <p id="askText"></p>
     <div class="dlg-actions">
       <button class="btn" value="no" type="submit">Cancel</button>
-      <button class="btn primary" id="askYes" value="yes" type="submit"></button>
+      <button class="btn go" id="askYes" value="yes" type="submit"></button>
     </div>
   </form>
 </dialog>

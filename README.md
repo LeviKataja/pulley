@@ -12,9 +12,11 @@ for those apps:
 - It waits for the new version to come up. If it does not, the old one is put back.
 - It keeps the image from before, so you can go back later with one button.
 
-![The page: four projects, one with changes waiting, one whose update was put back](docs/page.png)
+![The page: every project on a board, and beside it what is waiting for the selected one](docs/page.png)
 
-![An update in progress](docs/updating.png)
+![An update in progress: the row counts the steps, the panel shows them and what is being printed](docs/updating.png)
+
+![After an update was put back: the reason, and the last lines the failed container printed](docs/putback.png)
 
 ## What has and has not been tried
 
@@ -22,9 +24,11 @@ Pulley is new. Read this before you point it at something you care about.
 
 | Part | State |
 |---|---|
-| The update steps (move the code, build, swap, wait, put back, go back) | Covered by tests that use real git and a stand-in for the `docker` command, and read once by a second reviewer looking for places where real Docker behaves differently. **Never run against a real Docker.** |
-| `Dockerfile`, `compose.example.yaml` | Never built or started. |
-| The page | Driven by hand in Chrome with made-up projects: desktop and phone width, dark and light. The page has no tests of its own. |
+| The update steps (move the code, build, swap, wait, put back, go back) | Covered by tests that use real git and a stand-in for the `docker` command. Also run by hand once on a real Docker (Engine 29.9, Compose 5.7, Rocky Linux 9) with a small test app: a good update, a build that fails, a crash at start, a health check that passes and one that fails, a health address, going back, an override file, a missing value, a leftover one-off container, and stopping Pulley in the middle of an update. All behaved as described here. |
+| A real project from GitHub | One: a Python app with its own Dockerfile, cloned two commits behind, started by hand and updated by Pulley. |
+| `Dockerfile`, `compose.example.yaml` | Built and run on that same machine. |
+| Other Docker and Compose versions, other Linux systems | Never tried. |
+| The page | Driven in Chrome with made-up projects: an update, one that is put back, and going back, at desktop and phone width. Looked at in the dark theme only. It loads no fonts, so its headings use whatever condensed typeface the machine has. The page has no tests of its own. |
 | A NAS (TrueNAS, Unraid, Synology) | Never tried. An app that the NAS's own app system manages is probably not one Pulley can see. |
 | Docker Desktop on Windows or macOS | Not expected to work: folders cannot sit at the same path inside and outside (see below). |
 
